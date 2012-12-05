@@ -750,7 +750,7 @@ void DetectorScan::dsAnalysisDefect(Mat &image1ch,vector<vector<int> > &ifdefect
 //    imageGray.at<uchar>(y, x) = 100;
 //    Обратите внимание, что x и y в вызове переставлены местами.
 
-    Mat tempimage,tempimage2;
+    Mat tempimage;
     vector<Vec2i> coordefects;
     vector<Vec2i> tempdefects;
     const int Nx = ifdefects.size();
@@ -758,7 +758,7 @@ void DetectorScan::dsAnalysisDefect(Mat &image1ch,vector<vector<int> > &ifdefect
 
     int numofcont;
     Vec2i tmpvec2i;
-    Mat copyimage;
+
     Rect rectimage;
 
     for (int i=0;i<Nx;i++)
@@ -771,8 +771,7 @@ void DetectorScan::dsAnalysisDefect(Mat &image1ch,vector<vector<int> > &ifdefect
 #ifdef DEBUG
     cout << " Tentative Number of defects " << coordefects.size() << endl;
 #endif
-//    while (coordefects.size()!=0)
-//    {
+
     int Nfor = coordefects.size();
     int Iter = 0;
     int Iter2 = 0;
@@ -798,8 +797,6 @@ void DetectorScan::dsAnalysisDefect(Mat &image1ch,vector<vector<int> > &ifdefect
             {
                 if (fabs(contourArea(tempcontours[Iter2])) < (square[0]/PixelMinSquareInd))
                 {
-//                    cout << " DRAW  " << fabs(contourArea(tempcontours[Iter2])) << "  " <<  square[0]/PixelMinSquareInd << endl;
-//                    if (fabs(contourArea(tempcontours[Iter2]))==0) cout << " NULL " << tempcontours[Iter2].size() << endl;
                     drawContours(tempimage,tempcontours,Iter2,Scalar(/*155*/0),CV_FILLED);
                     tempcontours.erase(tempcontours.begin()+Iter2);
                     Iter2 = Iter2 - 1;
@@ -811,11 +808,9 @@ void DetectorScan::dsAnalysisDefect(Mat &image1ch,vector<vector<int> > &ifdefect
         {
             ifdefects[tmpvec2i[0]][tmpvec2i[1]] = NOPIXEL;
             coordefects.erase(coordefects.begin()+Iter);
-//            Iter--;
-//            Iter++;
             continue;
         }
-        tempimage2 = tempimage.clone();
+
         int tmpstat = 0;
         int Nindicator,Sindicator,Windicator,Eindicator;
         int Nstat,Sstat,Wstat,Estat;
@@ -825,36 +820,28 @@ void DetectorScan::dsAnalysisDefect(Mat &image1ch,vector<vector<int> > &ifdefect
 
         //int
 
-        for (int j=1;j<tempimage2.cols-1;j++)
+        for (int j=1;j<tempimage.cols-1;j++)
         {
-            if (tempimage2.at<uchar>(1,j)>10)
+            if (tempimage.at<uchar>(1,j)>10)
             {
                 tmpstat++; Nstat++;
             }
-            if (tempimage2.at<uchar>((tempimage2.rows-2),j)>10)
+            if (tempimage.at<uchar>((tempimage.rows-2),j)>10)
             {
                 tmpstat++; Sstat++;
             }
         }
-//        for (int j=1;j<tempimage2.cols-1;j++)
-//        {
-//            if (tempimage2.at<uchar>((tempimage2.rows-2),j)>10) tmpstat++;
-//        }
-        for (int j=1;j<tempimage2.rows-1;j++)
+        for (int j=1;j<tempimage.rows-1;j++)
         {
-            if (tempimage2.at<uchar>(j,1)>10)
+            if (tempimage.at<uchar>(j,1)>10)
             {
                 tmpstat++; Estat++;
             }
-            if (tempimage2.at<uchar>(j,tempimage2.cols-2)>10)
+            if (tempimage.at<uchar>(j,tempimage.cols-2)>10)
             {
                 tmpstat++; Wstat++;
             }
         }
-//        for (int j=1;j<tempimage2.rows-1;j++)
-//        {
-//            if (tempimage2.at<uchar>(j,tempimage2.cols-2)>10) tmpstat++;
-//        }
 
         if (tmpstat==0)
         {
@@ -1025,43 +1012,47 @@ void DetectorScan::dsAnalysisIzolatedDefect(Mat &image1ch, vector<vector<int> > 
     }
 }
 
-vector<vector<int> > DetectorScan::dsFindDefects(Mat &source, vector<Vec2i> &gridx, vector<Vec2i> &gridy, vector<Vec3f> &foundpixels, Vec6i indexofpict)
+vector<vector<int> > DetectorScan::dsFindDefects(Mat &source, vector<Vec2i> &gridx, vector<Vec2i> &gridy, vector<Vec3f> &foundpixels, Vec6i indexofpict, short SavePictAs)
 {
+    // indexofpict состоит из двух индексов означающих индекс снимка по X и Y
+    // остальные четыре индекса означают индекс края от севера по часовой стрелке, если снимок
+    // с краю то 1
     int Nx, Ny;
     Nx = gridx.size();
     Ny = gridy.size();
     vector<vector<int> > ifdefects;
 
-    string NameFile,NameFilePng,NameFileDat,NameFileGrids,IndexBorder;
+    string NameFile,NameFilePng,NameFileJpg,NameFileDat,NameFileGrids,IndexBorder;
     string tmpxind,tmpyind;
     char tmpch[3];
 #ifdef __MINGW_GCC
     itoa(indexofpict[0],tmpch,10);
 #endif
 #ifdef unix
-    //char str[16]; int i = 10; sprintf(str,"%i",i);
-    sprintf(tmpch,"%i",indexofpict[0]);
+    sprintf(tmpch,"%03i",indexofpict[0]);
 #endif
 
-    if ( indexofpict[0] > 9 && indexofpict[0] > 0)
-    {
-        if (indexofpict[0] > 99 && indexofpict[0] < 999) tmpxind = string(tmpch);
-        else tmpxind = "0" + string(tmpch);
-    }
-    else tmpxind = "00" + string(tmpch);
+//    if ( indexofpict[0] > 9 && indexofpict[0] > 0)
+//    {
+//        if (indexofpict[0] > 99 && indexofpict[0] < 999) tmpxind = string(tmpch);
+//        else tmpxind = "0" + string(tmpch);
+//    }
+//    else tmpxind = "00" + string(tmpch);
+    tmpxind = string(tmpch);
 
 #ifdef __MINGW_GCC
     itoa(indexofpict[1],tmpch,10);
 #endif
 #ifdef unix
-    sprintf(tmpch,"%i",indexofpict[1]);
+    sprintf(tmpch,"%03i",indexofpict[1]);
 #endif
-    if ( indexofpict[1] > 9 && indexofpict[1] > 0)
-    {
-        if (indexofpict[1] > 99 && indexofpict[1] < 999) tmpyind = string(tmpch);
-        else tmpyind = "0" + string(tmpch);
-    }
-    else tmpyind = "00" + string(tmpch);
+//    if ( indexofpict[1] > 9 && indexofpict[1] > 0)
+//    {
+//        if (indexofpict[1] > 99 && indexofpict[1] < 999) tmpyind = string(tmpch);
+//        else tmpyind = "0" + string(tmpch);
+//    }
+//    else tmpyind = "00" + string(tmpch);
+    tmpyind = string(tmpch);
 
 
     if (indexofpict[2] == 0) IndexBorder = "0";
@@ -1075,7 +1066,9 @@ vector<vector<int> > DetectorScan::dsFindDefects(Mat &source, vector<Vec2i> &gri
     IndexBorder = "B" + IndexBorder;
 
     NameFile = "X" + tmpxind + "Y" + tmpyind + IndexBorder;
-    NameFilePng = tmpresdir + NameFile + ".jpeg";
+
+    NameFileJpg = tmpresdir + NameFile + ".jpeg";
+    NameFilePng = tmpresdir + NameFile + ".png";
     NameFileDat =  tmpresdir + NameFile + ".dat";
     NameFileGrids = tmpresdir + NameFile + "-grids.dat";
 
@@ -1134,35 +1127,28 @@ vector<vector<int> > DetectorScan::dsFindDefects(Mat &source, vector<Vec2i> &gri
         }
     }
 
-    //////// TEMP BEGIN///////////////////////////////////////////////////////
+//////// TEMP BEGIN///////////////////////////////////////////////////////
     square = square/foundpixels.size();
-
-
-    vector<Vec2i> coordefects;
+    //vector<Vec2i> coordefects;
     Vec3f Vecsquare(square,squaremin,squaremax);
-//    int Nxc = ifdefects.size();
-//    int Nyc = ifdefects[0].size();
-//    for (int i=0;i<Nxc;i++)
-//    {
-//        for (int j=0;j<Nyc;j++)
-//        {
-//            if (ifdefects[i][j]==0) coordefects.push_back(Vec2i(i,j));
-//        }
-//    }
-//    cout << " SIZEEE " << coordefects.size() << endl;
 
-//    dsAnalysisIzolatedDefect(source,ifdefects,gridx,gridy,coordefects,Vecsquare);
-//    coordefects.clear();
     dsAnalysisDefect(source,ifdefects,gridx,gridy,Vecsquare);
-
-
-    //////// TEMP END///////////////////////////////////////////////////////
+//////// TEMP END///////////////////////////////////////////////////////
 
     vector<int> param;
-    param.push_back(CV_IMWRITE_JPEG_QUALITY);
-    param.push_back(JPEG_QUAL);
 
-    imwrite(NameFilePng,source,param);
+    if (SavePictAs==SAVEASPNG)
+    {
+        param.push_back(CV_IMWRITE_PNG_COMPRESSION);
+        param.push_back(PNG_QUAL);
+        imwrite(NameFilePng,source,param);
+    }
+    if (SavePictAs==SAVEASJPEG)
+    {
+        param.push_back(CV_IMWRITE_JPEG_QUALITY);
+        param.push_back(JPEG_QUAL);
+        imwrite(NameFileJpg,source,param);
+    }
 
     ofstream defout(NameFileDat.c_str());
     for (int i=0; i < Ny;i++)
@@ -1257,7 +1243,10 @@ vector<Vec3f> DetectorScan::dsFindPixelsUsingContours(const Mat& binaryimage/*, 
             //imwrite("./tempimage/nullcontors.png",dst0);
     // TMP END
 
-    vector<vector<cv::Point2i> > shabloncontour;
+    VecP2i shabloncontour;
+
+    // файл contourround.dsshcon с шаблоном можно сгенерировать с помощью
+    // функции dsShablonContourFile()
 
     if (ifstream("contourround.dsshcon") != NULL)
     {
@@ -1292,91 +1281,20 @@ vector<Vec3f> DetectorScan::dsFindPixelsUsingContours(const Mat& binaryimage/*, 
             }
 #ifdef DEBUG
             cout << "  using \"./contourround.dsshcon\" " << endl;
-#endif
+
             // TMP BEGIN
                     Mat dst = Mat::zeros(binaryimage.rows, binaryimage.cols, CV_8UC3);
                     drawContours(dst,contours,-1,Scalar(0,255,255));
-                    imwrite("./tempimage/updatecontors.png",dst);
+                    cout << " ./tempimage/updatecontours.png" << endl;
+                    imwrite("./tempimage/updatecontours.png",dst);
             // TMP END
-
+#endif
     }
     else
     {
         cerr << "template of contour is not found " << endl;
         exit(NOSHABLONFILE);
     }
-
-//    if (cvLoadImage("./shabloncontour2.png",0) != NULL)
-//    {
-//        IplImage* tmpim = cvLoadImage("./shabloncontour2.png",0);
-//        Mat shabloncontourimage = tmpim;
-
-//        findContours(shabloncontourimage,shabloncontour,CV_RETR_EXTERNAL,CV_CHAIN_APPROX_SIMPLE);
-//        if (shabloncontour.size()==1)
-//        {
-//            dsUpdateListOfContours(contours,shabloncontour[0],valuesforshapes,method);
-//        }
-
-
-//        for (int i=0;i<contours.size();i++)
-//        {
-//            mu = moments(contours[i],false);
-//            Xpix = mu.m10/mu.m00;
-//            Ypix = mu.m01/mu.m00;
-//            Radius = sqrt(fabs(contourArea(contours[i]))/pi);
-//            outputpixels.push_back(Vec3f(Xpix,Ypix,Radius));
-//        }
-
-//        // TMP BEGIN
-//        cout << "  using \"./shabloncontour2.png\" " << endl;
-//                Mat dst = Mat::zeros(binaryimage.rows, binaryimage.cols, CV_8UC3);
-//                drawContours(dst,contours,-1,Scalar(0,255,255));
-//                imwrite("./tempimage/updatecontors.png",dst);
-//        // TMP END
-
-//    }
-//    else
-//    {
-//        if (ifstream("contourround.dsshcon") != NULL)
-//        {
-//                ifstream ishablons;
-
-//                ishablons.open("contourround.dsshcon",ios_base::binary);
-//                vector<Point2i> tmp;
-//                int tmp1,tmp2;
-//                //for (int i=0;i<shabloncontour.size();i++)
-//                while(ishablons.peek()!=-1)
-//                {
-//                    ishablons.read((char*)&tmp1,sizeof(int));
-//                    ishablons.read((char*)&tmp2,sizeof(int));
-
-//                    //shabloncontour[0].push_back(Point2i(tmp1,tmp2));
-//                    tmp.push_back(Point2i(tmp1,tmp2));
-//                    //cout << tmp1 << " " << tmp1 << endl;
-//                }
-//                ishablons.close();
-//                shabloncontour.push_back(tmp);
-////                cout<<"file size is "<<ishablons.tellg()
-////                      <<" bytes"<<endl;
-////                ishablons.close();
-//                dsUpdateListOfContours(contours,shabloncontour[0],valuesforshapes,method);
-//                for (int i=0;i<contours.size();i++)
-//                {
-//                    mu = moments(contours[i],false);
-//                    Xpix = mu.m10/mu.m00;
-//                    Ypix = mu.m01/mu.m00;
-//                    Radius = sqrt(fabs(contourArea(contours[i]))/pi);
-//                    outputpixels.push_back(Vec3f(Xpix,Ypix,Radius));
-//                }
-
-//                // TMP BEGIN
-//                        Mat dst = Mat::zeros(binaryimage.rows, binaryimage.cols, CV_8UC3);
-//                        drawContours(dst,contours,-1,Scalar(0,255,255));
-//                        imwrite("./tempimage/updatecontors.png",dst);
-//                // TMP END
-
-//        }
-//    }
 
     return outputpixels;
 }

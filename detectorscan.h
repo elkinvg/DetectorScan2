@@ -41,7 +41,7 @@ public:
 
     vector<cv::Vec3f> dsFindPixelsUsingContours(const cv::Mat &binaryimage,vector<vector<cv::Point2i> > &outputcontours, double valuesforshapes, int method, double minSquare);
     vector<cv::Vec3f> dsFindPixelsUsingContours(const cv::Mat &binaryimage,double valuesforshapes, int method);
-    vector<vector<int> > dsFindDefects(cv::Mat& source, vector<cv::Vec2i> &gridx, vector<cv::Vec2i> &gridy, vector<cv::Vec3f> &foundpixels,cv::Vec6i indexofpict);
+    vector<vector<int> > dsFindDefects(cv::Mat& source, vector<cv::Vec2i> &gridx, vector<cv::Vec2i> &gridy, vector<cv::Vec3f> &foundpixels,cv::Vec6i indexofpict, short int SavePictAs = SAVEASPNG);
     void dsShiftImage(cv::Mat& source, double shiftx, double shifty, bool ifresize=false);
     void dsGetContrast(const cv::Mat &image3chorgray,int sizeofmatforcon, vector<vector<double> > &valofcon);
     void dsResizeImage(const cv::Mat& source,cv::Mat &output,double resize);
@@ -52,9 +52,9 @@ public:
     void dsCutROIofImage(cv::Mat &image,cv::Point2i pointUpLeft, cv::Point2i pointDownRight);
     void dsCutROIofImage(cv::Mat &image,cv::Vec4i XYWidthHeight);
 
-    void dsFindRelatedDefect(vector<vector<int> > &ifdefects, vector<cv::Vec2i> &coordefects, vector<cv::Vec4i>& DirectionOfDefect);
+
     double dsFindOptimalThreshold(const cv::Mat &image1ch, double valuesforshapes, int method, double beginthresh = 0, double minArea = 10.);
-    void dsAnalysisDefect(cv::Mat &image1ch,vector<vector<int> > &ifdefects, vector<cv::Vec2i> &gridx, vector<cv::Vec2i> &gridy, cv::Vec3f square);
+
     void dsEqualizeHistMethod(const cv::Mat& in, cv::Mat& out);
     void dsEqualizeHistMethod1ch(cv::Mat& InAndOut);
 
@@ -75,6 +75,9 @@ public:
     int SIZE_ROI;
 
 private:
+    void dsAnalysisDefect(cv::Mat &image1ch,vector<vector<int> > &ifdefects, vector<cv::Vec2i> &gridx, vector<cv::Vec2i> &gridy, cv::Vec3f square);
+    void dsFindRelatedDefect(vector<vector<int> > &ifdefects, vector<cv::Vec2i> &coordefects, vector<cv::Vec4i>& DirectionOfDefect);
+
     void dsUpdateListOfContours( vector<vector<cv::Point2i> > &inputcontours,vector<cv::Point2i> shabloncontour,double valuesforshapes, int method, bool ifusingsquare = false, double minArea = 10.);
     void dsUpdateListOfContoursUsingSquare(vector<vector<cv::Point2i> > &inputcontours,double minArea = 10.);
     void dsAnalysisIzolatedDefect(cv::Mat &image1ch,vector<vector<int> > &ifdefects, vector<cv::Vec2i> &coordefects, vector<vector<cv::Point2i> > &tempcontours, cv::Vec3f square);

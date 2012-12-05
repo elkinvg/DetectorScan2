@@ -3,6 +3,7 @@
 
 #include <opencv/cv.h>
 #include <string.h>
+#include <iostream>
 
 const double pi = 3.141592653589793238462643;
 const int NUMINCHANELL = 256;
@@ -16,15 +17,22 @@ const int MinNumOfPixels = 100;
 #endif
 
 const int JPEG_QUAL = 70; //In the case of JPEG it can be a quality ( CV_IMWRITE_JPEG_QUALITY ), from 0 to 100 (the higher is the better), 95 by default.
+const int PNG_QUAL = 5;// For PNG, it can be the compression level ( CV_IMWRITE_PNG_COMPRESSION ) from 0 to 9. A higher value means a smaller size and longer compression time. Default value is 3.
 
 const int PixelMinSquareInd = 2;
 
 typedef cv::Vec<double, 7> Vec7d;
 typedef std::vector<std::vector<int> > VecInt2;
 typedef std::vector<std::vector<double> > VecDbl2;
+typedef std::vector<std::vector<cv::Point2i> > VecP2i;
 
 const std::string tmpimdir = "./tempimage/";
 const std::string tmpresdir = "./tmpres/";
+
+enum { // save picture as ..
+    SAVEASPNG = 0,
+    SAVEASJPEG = 1
+};
 
 enum METHODOFFINDOFANGLE {
     SIMPLE = 1,
@@ -106,42 +114,6 @@ struct ParForHoughCicles
     int  radiuslow;
     int  radiushigh;
 };
-
-
-////////////////////////////////////////////////////////////////////////////////
-
-//struct ParForMask
-//{
-//    //
-//    cv::Point2i L_cell; //coordinate of the leftmost cell
-//    cv::Point2i R_cell; //coordinate of the rightmost cell
-//    cv::Point2i U_cell; //coordinate of the uppermost cell
-//    cv::Point2i D_cell; //coordinate of the bottom cell
-
-//    int NumOfRow; // number of row
-//    int NumOfCol; // number of column
-
-//    double width_cell; //width of cells
-//    double angle; // угловое смещение плоскости картинки
-//    //int num_in_x; // количество ячеек по x (если одинаковое на всей плоскости картинки)
-//    //int num_in_y; // количество ячеек по y (если одинаковое на всей плоскости картинки)
-//    //int number;   // общее количество ячеек
-//};
-
-
-
-//struct ParForCanny
-//{
-//    double thresholdown;
-//    double thresholdup;
-//    //CANAL canal_c;
-//};
-
-
-
-
-
-
 
 struct ForGaussianBlur
 {

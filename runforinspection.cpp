@@ -208,7 +208,12 @@ void runforinspection::run(cv::Mat &image)
         //image1ch = image.clone();
         imwrite("./tempimage/rotate.png",image1ch);
 
-        foundpixels = dsFindPixelsUsingContours(image1ch,InputParam.valforshapes, InputParam.shapematch);
+        VecP2i contoursofpixel;
+        foundpixels = dsFindPixelsUsingContours(image1ch,contoursofpixel,InputParam.valforshapes, InputParam.shapematch,300.);
+
+        Mat dst = Mat::zeros(image1ch.rows, image1ch.cols, CV_8UC3);
+        drawContours(dst,contoursofpixel,-1,Scalar(0,255,255));
+        imwrite("./tempimage/allcontours.png",dst);
 
 
         if (foundpixels.size() < MinNumOfPixels)
@@ -293,7 +298,9 @@ void runforinspection::run(cv::Mat &image)
         Rect temprect;
         // Сетку получили, теперь поиск дефетков.
         vector<vector<int> > ifdefectsind;
+        imwrite("./tempimage/tmp0.png",image1ch);
         ifdefectsind = dsFindDefects(image,Gridx,Gridy,foundpixels,Vec6i(0,0,1,1,1,1));
+        imwrite("./tempimage/tmp1.png",image1ch);
         //dsFindRelatedDefect(findDefects);
         //dsAnalysisDefect(image1ch,ifdefectsind,Gridx,Gridy);
 
