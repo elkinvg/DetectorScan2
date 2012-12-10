@@ -16,7 +16,7 @@ public:
     DetectorScan(IplImage* image, int canal, int size_roi);
     DetectorScan(cv::Mat& image);
     DetectorScan(cv::Mat& image, int canal,int ifnegative, int Methoderode, int eroderadius, int erodeiter, int Threshold, int MaxThreshold, int shapematch,double valforshapes);
-    ~DetectorScan();
+    virtual ~DetectorScan();
 
     void InitializationDS();
 
@@ -25,12 +25,12 @@ public:
     void dsErodePixel(cv::Mat& image,int radius = 1, int iterations =1);
     void dsDilatePixel(cv::Mat& image,int radius = 1, int iterations =1);
 
-    IplImage* SelectChannel(IplImage* image, int canal = GRAY);
-    void SelectChannel(cv::Mat &image, int ifnegative, int canal = GRAY);
+    virtual IplImage* SelectChannel(IplImage* image, int canal = GRAY);
+    virtual void SelectChannel(cv::Mat &image, int ifnegative, int canal = GRAY);
 
-    IplImage* dsPostThreshold(IplImage* image1ch,double threshold, double maxval);
+    virtual IplImage* dsPostThreshold(IplImage* image1ch,double threshold, double maxval);
     /*cv::Mat*/
-    void dsPostThreshold(cv::Mat& image1ch,double val_threshold, double maxval);
+    virtual void dsPostThreshold(cv::Mat& image1ch,double val_threshold, double maxval);
 
     void rotateImage(cv::Mat& source, double angle, int interpolmethod =cv::INTER_AREA);
     IplImage* rotateImage(IplImage* image, double angle);

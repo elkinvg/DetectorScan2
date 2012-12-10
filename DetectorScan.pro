@@ -1,18 +1,23 @@
 TEMPLATE = app
 CONFIG += console
-CONFIG -= qt
+CONFIG += qt
 MOC_DIR = moc
 OBJECTS_DIR = obj
 DESTDIR += bin
-
+DEPENDPATH += dll
+VERSION += 1.2.0.0
+TARGET = DetectorScan
+CONFIG += debug_and_release
 
 win32 {
-INCLUDEPATH += "c:/opt/opencv/mingw32/include"
-#INCLUDEPATH += "c:/dev/OpenCV-2.3.0/mingw32/include"
+#INCLUDEPATH += "c:/opt/opencv/mingw32/include"
+INCLUDEPATH += "c:/dev/OpenCV-2.3.0/mingw32/include"
 #INCLUDEPATH += . include
-LIBS += "c:/opt/opencv/mingw32/lib/*.a"
-#LIBS += "c:/dev/OpenCV-2.3.0/mingw32/lib/*.a"
-
+#LIBS += "c:/opt/opencv/mingw32/lib/*.a"
+LIBS += "c:/dev/OpenCV-2.3.0/mingw32/lib/*.a"
+CONFIG(debug, debug|release) {
+     DEFINES += DEBUG
+}
 #LIBS += -L"./lib" -lds
 }
 
@@ -28,13 +33,16 @@ SOURCES += main.cpp \
     detectorscan.cpp \
     dsvisualmethofopencv.cpp \
     foundcircles.cpp \
-    runforinspection.cpp
+    runforinspection.cpp \
+    qdsandfc.cpp
+    
 
 HEADERS += \
     detectorscan.h \
     commonstruct.h \
     dsvisualmethofopencv.h \
     foundcircles.h \
-    runforinspection.h
+    runforinspection.h \
+    qdsandfc.h
 
 
